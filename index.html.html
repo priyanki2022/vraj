@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBO1hZyZsyekvCcOMoi01Pz_HoeBnv1Noc&callback=initMap"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: aqua;
+            position: relative;
+            overflow: hidden; 
+        }
+        
+        header {
+            display: flex;
+            background-color: #b8f5ba; 
+            color: white;
+            padding: 20px;
+            font-size: 24px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+            position: relative;
+            z-index: 1;
+        }
+        header h1 {
+            margin: 0;
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+        }
+    
+        .clouds1{
+            position: absolute;
+            top: 130px;
+            left: 75px;
+            transform: scale(2);
+        }
+        .clouds2{
+            position: absolute;
+            top: 200px;
+            left: 270px;
+            transform: scale(1.5)
+        }
+        .clouds3{
+            position: absolute;
+            top: 270px;
+            left: 440px;
+            transform: scale(1.3);
+        }
+        .sun{
+            position: absolute;
+            margin-left: 700px;
+            margin-top: -200px;
+            transform: scale(0.2);
+            background: transparent;
+        }
+        .wind{
+            transform: scale(0.1);
+        }
+        .wind1{
+            position: absolute;
+            top: -100px;
+            left: 200px;
+        }
+        .wind2{
+            position: absolute;
+            top: -200px;
+            left: 300px;
+        }
+        #city-input {
+            position: absolute;
+            top: 20px;
+            right: 300px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            outline: none;
+        }  
+        #show{
+            position: absolute;
+            top: 20px;
+            right: 150px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            outline: none;
+        }
+        #show:hover{
+            opacity: 0.8;
+        }
+        #city-input:hover{
+            opacity: 0.8;
+        }
+        .modal-header{
+            background-color: #b8f5ba;
+        }
+        .modal-title{
+            text-transform: capitalize;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            font-weight: 200;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+        #latitude,#longitude{
+            background-color: beige;
+            border-radius: 20px;
+        }
+        
+        .modal-body {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        #map-container {
+            flex: 1;
+        }
+        .form-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Weather App</h1>
+        <input type="text" id="city-input" placeholder="Enter city...">
+        <button id="show" value="Show" data-bs-toggle="modal" data-bs-target="#staticBackdrop" onclick="fun(),fun1()">Show</button>
+    </header>
+    <img class="cloud clouds1" src="images/clouds (1).png">
+    <img class="cloud clouds2" src="images/clouds (2).png">
+    <img class="cloud clouds3" src="images/clouds (3).png">
+    <img class="sun" src="images/sun-ezgif.com-effects.gif">
+    <img class="wind wind1" src="images/wind-ezgif.com-effects.gif">
+    <img class="wind wind2" src="images/wind-ezgif.com-effects.gif">
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="map-container">
+                        <iframe id="map-frame" 
+                                style="width: 100%; height: 400px;" 
+                                frameborder="0" 
+                                style="border:0;border-radius: 10px;border-color: aqua;" 
+                                tabindex="0"></iframe>
+                    </div>
+                    <div class="form-container">
+                        <div class="relative mb-4">
+                            <label for="latitude" class="leading-7 text-sm text-gray-600">Latitude</label>
+                            <input type="text" id="latitude" name="latitude" class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                        </div>
+                        <div class="relative mb-4">
+                            <label for="longitude" class="leading-7 text-sm text-gray-600">Longitude</label>
+                            <input type="text" id="longitude" name="longitude" class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                        </div>
+                        <div class="relative mb-4">
+                            <label for="message" class="leading-7 text-sm text-gray-600">Weather Information</label>
+                            <textarea id="message" name="message" class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"></textarea>
+                        </div>
+                        
+                        <button class="text-white bg-green-300 border-0 py-2 px-6 focus:outline-none hover:bg-green-400 rounded text-lg">Button</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+   <script>
+    function fun() {
+        var city = document.getElementById("city-input").value;
+        document.getElementById("staticBackdropLabel").innerHTML = city;
+        var mapFrame = document.getElementById("map-frame");
+        var apiKey = "AIzaSyBO1hZyZsyekvCcOMoi01Pz_HoeBnv1Noc"; 
+        var mapUrl = "https://www.google.com/maps/embed/v1/place?key=" + apiKey + "&q=" + encodeURIComponent(city);        
+        mapFrame.src = mapUrl;
+        console.log("Map URL: " + mapUrl);
+    }
+
+    function fun1() {
+    var city = document.getElementById("city-input").value;
+    var apiKey = "AIzaSyBO1hZyZsyekvCcOMoi01Pz_HoeBnv1Noc";  
+    var weatherApiKey = "b9a0156dd67d84ed84ca7eeb3ceee265";  
+    var geocodeUrl = "https://maps.googleapis.com/maps/api/geocode/json?address=" + encodeURIComponent(city) + "&key=" + apiKey;
+
+    fetch(geocodeUrl)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "OK") {
+                var latitude = data.results[0].geometry.location.lat;
+                var longitude = data.results[0].geometry.location.lng;
+                document.getElementById("latitude").value = latitude;
+                document.getElementById("longitude").value = longitude;
+                var weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${weatherApiKey}&units=metric`;
+
+                return fetch(weatherUrl);
+            } else {
+                alert("Geocoding failed: " + data.status);
+            }
+        })
+        .then(response => response.json())
+        .then(weatherData => {
+            if (weatherData) {
+                var weatherContainer = document.getElementById("message");
+                var weatherInfo = `
+                    Temperature: ${weatherData.main.temp} °C
+                    Weather: ${weatherData.weather[0].description}
+                    Humidity: ${weatherData.main.humidity} %
+                    Wind Speed: ${weatherData.wind.speed} m/s
+                `;
+                weatherContainer.value = weatherInfo;
+            }
+        })
+        .catch(error => console.error("Error fetching data: ", error));
+}
+
+   </script>
+</body>
+</html>
